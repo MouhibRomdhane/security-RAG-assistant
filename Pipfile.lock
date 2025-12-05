@@ -1,11 +1,11 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "9b15d6a6c2bae55297e9e59c2b85fe6c56c9fb504a834262c58b5578b3fb5b5c"
+            "sha256": "28b3b705e4cc7fb839e7a6d1e9c7844fe915b06e20af09a799d10d0c5559fd90"
         },
         "pipfile-spec": 6,
         "requires": {
-            "python_version": "3.13"
+            "python_version": "3"
         },
         "sources": [
             {
@@ -1378,11 +1378,11 @@
         },
         "langgraph-api": {
             "hashes": [
-                "sha256:aa2d9fedc3d1c9394bd1534265f107bcb508e31e4f029fad1795489178d1adf2",
-                "sha256:f95f9102ca9b8a1716be7c57d7812344c785c9a1785b3bda84f1c30517c5fbec"
+                "sha256:5f17beafa86b75846d63629f50c949d005fde841c3be8aba0913ba76326658d1",
+                "sha256:b12886f70dfff50a0d107c4a852da86326b69e8eff985dac27a36457181947e7"
             ],
             "markers": "python_version >= '3.11'",
-            "version": "==0.5.30"
+            "version": "==0.5.31"
         },
         "langgraph-checkpoint": {
             "hashes": [
