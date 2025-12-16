@@ -4,3 +4,7 @@ __pycache__/
 vectordb/
 .langgraph_api/
 .vscode/
+.venv
+notbooks
+script-to-clean
+Data
