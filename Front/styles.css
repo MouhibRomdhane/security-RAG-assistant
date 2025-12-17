@@ -1,0 +1,160 @@
+:root{
+  --bg:#05080c;
+  --panel: rgba(8, 16, 20, .78);
+  --line: rgba(0,255,179,.22);
+  --text: rgba(230,255,248,.92);
+  --muted: rgba(170,220,210,.70);
+  --accent:#00ffb3;
+  --accent2:#00d4ff;
+  --shadow: 0 18px 70px rgba(0,0,0,.6);
+  --r: 22px;
+  --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  font-family:var(--mono);
+  color:var(--text);
+  background:
+    radial-gradient(1000px 700px at 80% 10%, rgba(0,255,179,.18), transparent 60%),
+    radial-gradient(900px 650px at 15% 25%, rgba(0,212,255,.12), transparent 55%),
+    linear-gradient(180deg, #04070a, #070b10);
+  display:grid;
+  place-items:center;
+  padding: 18px;
+}
+
+.shell{
+  width:min(1100px, 92vw);
+  height:min(820px, 92vh);
+  border-radius: var(--r);
+  background: var(--panel);
+  border: 1px solid rgba(0,255,179,.22);
+  box-shadow: var(--shadow);
+  overflow:hidden;
+  backdrop-filter: blur(10px);
+  position:relative;
+}
+
+.shell::before{
+  content:"";
+  position:absolute; inset:0;
+  background:
+    linear-gradient(to right, var(--line) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--line) 1px, transparent 1px);
+  background-size: 48px 48px;
+  opacity:.22;
+  pointer-events:none;
+}
+
+.topbar{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding: 16px 18px;
+  border-bottom: 1px solid rgba(0,255,179,.16);
+  background: rgba(0,0,0,.18);
+}
+
+.brand{
+  display:flex;
+  align-items:center;
+  gap: 12px;
+}
+.dot{
+  width:10px;height:10px;border-radius:999px;
+  background: var(--accent);
+  box-shadow: 0 0 18px rgba(0,255,179,.8);
+}
+.name{
+  letter-spacing:.14em;
+  font-weight:600;
+  font-size: 14px;
+}
+.sub{
+  margin-top:4px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.pill{
+  font-size:12px;
+  padding: 7px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(0,255,179,.28);
+  background: rgba(0,255,179,.08);
+}
+
+.chat{
+  height: calc(100% - 74px - 86px);
+  padding: 18px;
+  overflow:auto;
+}
+
+.msg{ margin: 0 0 12px 0; }
+.bubble{
+  display:inline-block;
+  padding: 12px 14px;
+  border-radius: 18px;
+  border: 1px solid rgba(0,255,179,.16);
+  background: rgba(0,0,0,.18);
+  max-width: 82%;
+  line-height:1.45;
+  white-space: pre-wrap;
+}
+
+.msg.user{ text-align:right; }
+.msg.user .bubble{
+  border-color: rgba(0,255,179,.30);
+  background: rgba(0,255,179,.10);
+}
+
+.msg.bot .bubble{
+  border-color: rgba(0,212,255,.22);
+  background: rgba(0,212,255,.08);
+}
+
+.composer{
+  display:flex;
+  gap: 12px;
+  padding: 14px 16px;
+  border-top: 1px solid rgba(0,255,179,.16);
+  background: rgba(0,0,0,.18);
+}
+
+.input{
+  flex:1;
+  border: 1px solid rgba(0,255,179,.20);
+  background: rgba(0,0,0,.22);
+  color: var(--text);
+  border-radius: 16px;
+  padding: 12px 12px;
+  outline:none;
+  font-family: var(--mono);
+}
+
+.input:focus{
+  border-color: rgba(0,255,179,.46);
+  box-shadow: 0 0 0 4px rgba(0,255,179,.10);
+}
+
+.sendBtn{
+  min-width: 110px;
+  border-radius: 16px;
+  border: 1px solid rgba(0,255,179,.35);
+  background: rgba(0,255,179,.12);
+  color: var(--text);
+  font-family: var(--mono);
+  font-weight: 600;
+  letter-spacing:.14em;
+  cursor:pointer;
+}
+
+.sendBtn:active{ transform: translateY(1px); }
+
+.sendBtn:disabled, .input:disabled{
+  opacity: .55;
+  cursor: not-allowed;
+}

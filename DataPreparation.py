@@ -1,71 +1,46 @@
 
 import datetime
-
 from langchain_community.document_loaders import DirectoryLoader
-
 from dotenv import load_dotenv
 from langchain_huggingface.embeddings import HuggingFaceEmbeddings
 load_dotenv()
-from langchain_community.document_loaders import PyPDFLoader,PDFMinerLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-
 from langchain_chroma import Chroma
-
-text_splitter = RecursiveCharacterTextSplitter(chunk_size=2000, chunk_overlap=600)
-
-import os
 from langchain_community.document_loaders import DirectoryLoader,UnstructuredMarkdownLoader
-
 import time
-
-from langchain_pymupdf4llm import PyMuPDF4LLMLoader # <--- The Pro PDF Loader
+from langchain_pymupdf4llm import PyMuPDF4LLMLoader 
 from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langchain_community.retrievers import BM25Retriever
+import pickle
+import os
+from pathlib import Path
 
-# Path to your data (From your previous screenshots)
-file_path = r".\data"
+file_path =str( Path(os.getenv("datapath")))
 
-print("🔄 Setting up Loaders for: PDF (Smart) + Markdown (MITRE/CSF)...")
+print("Setting up Loaders for: PDF (Smart) + Markdown (MITRE/CSF)")
 
-# We define a custom list of loaders to handle different file types differently
 loaders = [
-    # 1. PDF Loader (The "Pro" Switch)
-    # converting PDFs to Markdown first for better tables/headers
     DirectoryLoader(
         file_path,
         glob="*.pdf",
-        loader_cls=PyMuPDF4LLMLoader, # <--- Converts PDF to Markdown structure
+        loader_cls=PyMuPDF4LLMLoader, # 
         show_progress=True,
         use_multithreading=True
     ),
 
-    # 2. Markdown Loader (For MITRE & CSF folders)
-    # We use explicit TextLoader because your screenshots showed .md files
    DirectoryLoader(
         file_path,
         glob="**/*.md",
         loader_cls=UnstructuredMarkdownLoader,
         loader_kwargs={
-            "mode": "single", # <--- CRITICAL: Keeps file as one piece. 'elements' is too slow.
+            "mode": "single", 
             "autodetect_encoding": True 
         },
         show_progress=True,
         use_multithreading=True,
-        max_concurrency=8 # Don't go too high with Unstructured, it eats CPU
-    ),
+        max_concurrency=8 
+    )
 
-    # 3. (Optional) JSON Loader
-    # Only uncomment this if you actually have STIX JSON files. 
-    # Since you have the Markdown folders, you likely do NOT need this.
-    # DirectoryLoader(
-    #     file_path, 
-    #     glob="**/*.json", 
-    #     loader_cls=JSONLoader,
-    #     loader_kwargs={
-    #         "jq_schema": '.objects[] | select(.type != "relationship") | "Type: " + .type + "\nName: " + .name + "\nDescription: " + (.description // "No description")', 
-    #         "text_content": False
-    #     },
-    #     show_progress=True
-    # ),
 ]
 
 print("🚀 Starting Ingestion...")
@@ -75,54 +50,62 @@ start_time = time.time()
 for loader in loaders:
     try:
         new_docs = loader.load()
-        # Tag them so you know where they came from later
         if len(new_docs) > 0:
             source_type = "PDF_to_Markdown" if "pdf" in new_docs[0].metadata.get("source", "") else "Markdown_File"
-            print(f"   ✅ Loaded {len(new_docs)} files (Type: {source_type})")
+            print(f" oaded {len(new_docs)} files (Type: {source_type})")
             docs.extend(new_docs)
     except Exception as e:
-        print(f"   ❌ Error in loader: {e}")
+        print(f" Error in loader: {e}")
 
 duration = time.time() - start_time
 print(f"🎉 Total Loaded: {len(docs)} documents in {duration:.2f} seconds")
 
-# 4. Configure the Universal Splitter
-# This splitter handles both the "PDF-Markdown" and the "CSF-Text" safely.
+
 text_splitter = RecursiveCharacterTextSplitter(
-    chunk_size=1000,          # 1000 is usually better than 2000 for retrieval precision
-    chunk_overlap=150,        # Overlap to keep context across cuts
+    chunk_size=1000,          
+    chunk_overlap=150,       
     length_function=len,
     # Priority: Split by Paragraphs (\n\n) -> Lines (\n) -> Sentences
     separators=["\n\n", "\n", " ", ""] 
 )
 
-print("✂️ Chunking documents...")
+print("Chunking documents...")
 chunks = text_splitter.split_documents(docs)
 
-print(f"✅ Final Database Ready: {len(chunks)} chunks created.")
+print(f"Final Database Ready: {len(chunks)} chunks created.")
 
-# 5. Verification: Check a random chunk to ensure headers/tables look good
+""""
 if len(chunks) > 0:
     print("\n--- Sample Chunk Content ---")
     print(chunks[0].page_content[:500])
     print("\n--- Metadata ---")
     print(chunks[0].metadata)
+"""
+BM25_PATH = Path(os.getenv("BM25_PATH"))
+# 4. BUILD BM25 RETRIEVER (SPARSE INDEX)
+print("4. Building BM25 Index (Sparse Index)...")
+bm25_retriever = BM25Retriever.from_documents(chunks)
+bm25_retriever.k = 50  # We want a wide net for the first pass
+# 5. SAVE BM25 TO DISK
+print(f"5. Saving BM25 retriever to {BM25_PATH}...")
+with open(BM25_PATH, "wb") as f:
+    pickle.dump(bm25_retriever, f)
+    
+("--- BUILD COMPLETE ---")
 
-# 1. Define the BGE-M3 Model
 print("Loading BGE-M3 Model (This is large, please wait)...")
 embeddings = HuggingFaceEmbeddings(
     model_name="BAAI/bge-m3",
     model_kwargs={"device": "cuda"},
-    # EXPLICITLY force it to be small
-    encode_kwargs={"normalize_embeddings": True, "batch_size": 2} 
+    encode_kwargs={"normalize_embeddings": True, "batch_size": 4} 
 )
 
 start_time = time.time()
-
+vdb=str(Path(os.getenv("vdb")))
 vector_store = Chroma.from_documents(
     documents=chunks,
     embedding=embeddings,
-    persist_directory="./vectordb"
+    persist_directory=vdb
     )
 print("data saved")
 end_time = time.time()

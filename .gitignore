@@ -8,3 +8,4 @@ vectordb/
 notbooks
 script-to-clean
 Data
+bm25_retriever.pkl

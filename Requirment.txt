@@ -1,13 +1,25 @@
-langchain
-dotenv
-langchain_huggingface
-langchain_community
-langchain_chroma
-langchain_pymupdf4llm
-markdown
-sentence_transformers
+# --- Core Framework & API ---
+fastapi==0.124.4
+python-dotenv              
 langgraph-cli[inmem]
-langchain_groq
+
+# --- LangChain Ecosystem ---
+langchain==1.1.3
+langchain-community==0.4.1
+langchain-huggingface==1.1.0
+langchain-groq==1.1.0
+langchain-ollama==1.0.1
+langchain-chroma==1.0.0
+langchain-pymupdf4llm==0.5.0
+
+# --- AI & Data Processing ---
+sentence-transformers==5.1.2
+unstructured==0.18.21
+markdown==3.10
+
+# --- PyTorch (CUDA 12.4 Specific) ---
+# Note: These specific versions often require the extra index URL below
+--extra-index-url https://download.pytorch.org/whl/cu124
 torch==2.6.0+cu124
 torchaudio==2.6.0+cu124
 torchvision==0.21.0+cu124
